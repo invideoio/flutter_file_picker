@@ -58,6 +58,11 @@ public class FileUtils {
 
             mimes.add(mime);
         }
+
+        if(allowedExtensions.contains("m4a")) {
+            mimes.add("audio/mp4");
+        }
+
         Log.d(TAG, "Allowed file extensions mimes: " + mimes);
         return mimes.toArray(new String[0]);
     }
