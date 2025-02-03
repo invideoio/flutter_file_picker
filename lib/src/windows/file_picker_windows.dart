@@ -11,9 +11,11 @@ import 'package:file_picker/src/windows/file_picker_windows_ffi_types.dart';
 import 'package:path/path.dart';
 import 'package:win32/win32.dart';
 
-FilePicker filePickerWithFFI() => FilePickerWindows();
-
 class FilePickerWindows extends FilePicker {
+  static void registerWith() {
+    FilePicker.platform = FilePickerWindows();
+  }
+
   @override
   Future<FilePickerResult?> pickFiles({
     String? dialogTitle,
@@ -216,7 +218,7 @@ class FilePickerWindows extends FilePicker {
       case FileType.any:
         return 'All Files (*.*)\x00*.*\x00\x00';
       case FileType.audio:
-        return 'Audios (*.aac,*.midi,*.mp3,*.ogg,*.wav)\x00*.aac;*.midi;*.mp3;*.ogg;*.wav\x00\x00';
+        return 'Audios (*.aac,*.midi,*.mp3,*.ogg,*.wav,*.m4a)\x00*.aac;*.midi;*.mp3;*.ogg;*.wav;*.m4a\x00\x00';
       case FileType.custom:
         return 'Files (*.${allowedExtensions!.join(',*.')})\x00*.${allowedExtensions.join(';*.')}\x00\x00';
       case FileType.image:
@@ -225,8 +227,6 @@ class FilePickerWindows extends FilePicker {
         return 'Videos (*.avi,*.flv,*.mkv,*.mov,*.mp4,*.mpeg,*.webm,*.wmv)\x00*.avi;*.flv;*.mkv;*.mov;*.mp4;*.mpeg;*.webm;*.wmv\x00Images (*.bmp,*.gif,*.jpeg,*.jpg,*.png)\x00*.bmp;*.gif;*.jpeg;*.jpg;*.png\x00\x00';
       case FileType.video:
         return 'Videos (*.avi,*.flv,*.mkv,*.mov,*.mp4,*.mpeg,*.webm,*.wmv)\x00*.avi;*.flv;*.mkv;*.mov;*.mp4;*.mpeg;*.webm;*.wmv\x00\x00';
-      default:
-        throw Exception('unknown file type');
     }
   }
 
