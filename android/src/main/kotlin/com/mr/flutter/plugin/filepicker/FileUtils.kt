@@ -310,6 +310,12 @@ object FileUtils {
 
                 mimes.add(mime)
             }
+
+            if (allowedExtensions.contains("m4a")) {
+                mimes.add("audio/mp4")
+                mimes.add("audio/x-m4a")
+            }
+
             return mimes
         }
 
