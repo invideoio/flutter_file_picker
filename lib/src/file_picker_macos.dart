@@ -13,14 +13,38 @@ class FilePickerMacOS extends FilePicker {
       const MethodChannel('miguelruivo.flutter.plugins.filepicker');
 
   @override
+  Future<List<String>?> pickFileAndDirectoryPaths({
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+  }) async {
+    final fileFilter = fileTypeToFileFilter(
+      type,
+      allowedExtensions,
+    );
+
+    final filePaths = await methodChannel.invokeListMethod<String>(
+      'pickFileAndDirectoryPaths',
+      <String, dynamic>{
+        'allowedExtensions': fileFilter,
+        'initialDirectory': escapeInitialDirectory(initialDirectory),
+      },
+    );
+
+    return filePaths;
+  }
+
+  @override
   Future<FilePickerResult?> pickFiles({
     String? dialogTitle,
     String? initialDirectory,
     FileType type = FileType.any,
     List<String>? allowedExtensions,
     Function(FilePickerStatus)? onFileLoading,
-    bool allowCompression = true,
-    int compressionQuality = 30,
+    @Deprecated(
+        'allowCompression is deprecated and has no effect. Use compressionQuality instead.')
+    bool allowCompression = false,
+    int compressionQuality = 0,
     bool allowMultiple = false,
     bool withData = false,
     bool withReadStream = false,
@@ -79,9 +103,6 @@ class FilePickerMacOS extends FilePicker {
     Uint8List? bytes,
     bool lockParentWindow = false,
   }) async {
-    if (bytes != null) {
-      throw UnsupportedError('Bytes are not supported on macOS');
-    }
     final fileFilter = fileTypeToFileFilter(
       type,
       allowedExtensions,
@@ -97,6 +118,7 @@ class FilePickerMacOS extends FilePicker {
       },
     );
 
+    await saveBytesToFile(bytes, savedFilePath);
     return savedFilePath;
   }
 
