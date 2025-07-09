@@ -135,18 +135,21 @@ object FileUtils {
         if (type == "dir") {
             intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         } else {
-            if (type?.contains("image/*") == true || type?.contains("video/*") == true) {
+            if (type == "image/*") {
                 intent = Intent(Intent.ACTION_PICK)
+                val uri = (Environment.getExternalStorageDirectory().path + File.separator).toUri()
+                intent.setDataAndType(uri, type)
+                intent.type = this.type
                 intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, this.isMultipleSelection)
                 intent.putExtra("multi-pick", this.isMultipleSelection)
 
-                // Handle comma-separated MIME types for media gallery
-                if (type?.contains(",") == true) {
-                    val mimeTypes = type!!.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
-                    intent.type = "*/*" // Set to wildcard when using EXTRA_MIME_TYPES
-                } else {
-                    intent.type = type
+                type?.takeIf { it.contains(",") }
+                    ?.split(",")
+                    ?.filter { it.isNotEmpty() }
+                    ?.let { allowedExtensions = ArrayList(it) }
+
+                if (allowedExtensions != null) {
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES, allowedExtensions)
                 }
             } else {
                 intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
