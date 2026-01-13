@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.Parcelable
 import android.provider.DocumentsContract
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
 import android.webkit.MimeTypeMap
@@ -150,22 +151,18 @@ object FileUtils {
         if (type == "dir") {
             intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
         } else {
-            if (type == "image/*") {
+            if (type == "image/*" || type == "video/*" || type == "image/*,video/*") {
                 // Use ACTION_PICK for images to allow using the Gallery app, which provides a better UX for image selection.
-                intent = Intent(Intent.ACTION_PICK)
-                val uri = (Environment.getExternalStorageDirectory().path + File.separator).toUri()
-                intent.setDataAndType(uri, type)
-                intent.type = this.type
-                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, this.isMultipleSelection)
-                intent.putExtra("multi-pick", this.isMultipleSelection)
+                val typeToSet = when (type) {
+                    "image/*,video/*" -> "*/*"
+                    else -> type
+                }
 
-                type?.takeIf { it.contains(",") }
-                    ?.split(",")
-                    ?.filter { it.isNotEmpty() }
-                    ?.let { allowedExtensions = ArrayList(it) }
-
-                if (allowedExtensions != null) {
-                    intent.putExtra(Intent.EXTRA_MIME_TYPES, allowedExtensions)
+                intent = Intent(MediaStore.ACTION_PICK_IMAGES).apply {
+                    this.type = typeToSet
+                    if (isMultipleSelection) {
+                        putExtra(MediaStore.EXTRA_PICK_IMAGES_MAX, MediaStore.getPickImagesMaxLimit())
+                    }
                 }
             } else {
                 // Use ACTION_OPEN_DOCUMENT to allow selecting files from any document provider (SAF).
